@@ -1,6 +1,11 @@
 const express = require("express");
+const exphbs = require('express-handlebars');
 
 const app = express();
+
+// Handlebars Middleware
+app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+app.set('view engine', 'handlebars');
 
 const port = 5000;
 
