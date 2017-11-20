@@ -16,7 +16,9 @@ app.listen(port, function() {
 });
 
 app.get('/', function(req, res) {
-  res.render('index');
+  res.render('index', {
+    title: "Welcome"
+  });
 });
 
 app.get('/about', function(req, res) {
