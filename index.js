@@ -13,6 +13,11 @@ mongoose.connect('mongodb://localhost/video-dev', {
 }).then(() => { console.log('mongodb connected..!!'); })
   .catch(err => console.log(`error occured: ${err}`));
 
+// load idea model
+require('./models/Idea');
+
+const Idea = mongoose.model('ideas');
+
 // Handlebars Middleware
 app.engine('handlebars', exphbs({
   defaultLayout: 'main',
@@ -34,3 +39,8 @@ app.get('/', (req, res) => {
 app.get('/about', (req, res) => {
   res.render('about');
 });
+
+app.get('/ideas/add', (req, res) => {
+  res.render('ideas/add');
+});
+
