@@ -1,5 +1,6 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
+const path = require('path');
 const mongoose = require('mongoose');
 const flash = require('connect-flash');
 const session = require('express-session');
@@ -10,8 +11,10 @@ const users = require('./routes/users');
 
 const app = express();
 
+
 // map global promise
 mongoose.Promise = global.Promise;
+
 
 // connect to mongoose
 mongoose.connect('mongodb://localhost/video-dev', {
@@ -21,15 +24,21 @@ mongoose.connect('mongodb://localhost/video-dev', {
 })
   .catch(err => console.log(`error occured: ${err}`));
 
+
 // Handlebars Middleware
 app.engine('handlebars', exphbs({
   defaultLayout: 'main',
 }));
 app.set('view engine', 'handlebars');
 
+
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// static folder
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 // Method override middleware..
 app.use(methodOverride('_method'));
