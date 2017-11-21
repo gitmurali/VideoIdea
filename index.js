@@ -4,11 +4,14 @@ const mongoose = require('mongoose');
 
 const app = express();
 
+// map global promise
+mongoose.Promise = global.Promise;
+
 // connect to mongoose
 mongoose.connect('mongodb://localhost/video-dev', {
   useMongoClient: true,
-}).then(() => { console.log('mongodb connected..!!'); }).catch(err => console.log(`error occured: ${err}`));
-
+}).then(() => { console.log('mongodb connected..!!'); })
+  .catch(err => console.log(`error occured: ${err}`));
 
 // Handlebars Middleware
 app.engine('handlebars', exphbs({
