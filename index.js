@@ -1,8 +1,12 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
+const flash = require('connect-flash');
+const session = require('express-session');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
+const ideas = require('./routes/ideas');
+const users = require('./routes/users');
 
 const app = express();
 
@@ -17,11 +21,6 @@ mongoose.connect('mongodb://localhost/video-dev', {
 })
   .catch(err => console.log(`error occured: ${err}`));
 
-// load idea model
-require('./models/Idea');
-
-const Idea = mongoose.model('ideas');
-
 // Handlebars Middleware
 app.engine('handlebars', exphbs({
   defaultLayout: 'main',
@@ -34,6 +33,27 @@ app.use(bodyParser.json());
 
 // Method override middleware..
 app.use(methodOverride('_method'));
+
+// Express session middleware..
+app.use(session({
+  secret: 'secret',
+  resave: true,
+  saveUninitialized: true,
+}));
+
+app.use(flash());
+
+// global variables
+app.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  res.locals.error = req.flash('error');
+  next();
+});
+
+// use routes
+app.use('/ideas', ideas);
+app.use('/users', users);
 
 const port = 5000;
 
@@ -50,80 +70,3 @@ app.get('/', (req, res) => {
 app.get('/about', (req, res) => {
   res.render('about');
 });
-
-app.get('/ideas', (req, res) => {
-  Idea.find({})
-    .sort({ date: 'desc' })
-    .then((ideas) => {
-      res.render('ideas/index', {
-        ideas,
-      });
-    });
-});
-
-app.get('/ideas/add', (req, res) => {
-  res.render('ideas/add');
-});
-
-app.get('/ideas/edit/:id', (req, res) => {
-  Idea.findOne({
-    _id: req.params.id,
-  }).then((idea) => {
-    res.render('ideas/edit', {
-      idea,
-    });
-  });
-});
-
-app.put('/ideas/:id', (req, res) => {
-  Idea.findOne({
-    _id: req.params.id,
-  }).then((idea) => {
-    // new values
-    const videoIdea = idea;
-    videoIdea.title = req.body.title;
-    videoIdea.details = req.body.details;
-
-    videoIdea.save()
-      .then((idea) => {
-        res.redirect('/ideas');
-      });
-  });
-});
-
-app.delete('/ideas/:id', (req, res) => {
-  Idea.remove({
-    _id: req.params.id,
-  }).then(() => {
-    res.redirect('/ideas');
-  });
-});
-
-app.post('/ideas', (req, res) => {
-  const errors = [];
-
-  if (!req.body.title) {
-    errors.push({ text: 'please add a title' });
-  }
-  if (!req.body.details) {
-    errors.push({ text: 'please add some details' });
-  }
-  if (errors.length > 0) {
-    res.render('ideas/add', {
-      errors,
-      title: req.body.title,
-      details: req.body.details,
-    });
-  } else {
-    const newUser = {
-      title: req.body.title,
-      details: req.body.details,
-    };
-    new Idea(newUser)
-      .save()
-      .then((idea) => {
-        res.redirect('/ideas');
-      });
-  }
-});
-
