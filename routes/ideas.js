@@ -19,46 +19,6 @@ router.get('/', ensureAuthenticated, (req, res) => {
     });
 });
 
-router.get('/add', ensureAuthenticated, (req, res) => {
-  res.render('ideas/add');
-});
-
-router.get('/edit/:id', ensureAuthenticated, (req, res) => {
-  Idea.findOne({
-    _id: req.params.id,
-  }).then((idea) => {
-    res.render('ideas/edit', {
-      idea,
-    });
-  });
-});
-
-router.put('/:id', ensureAuthenticated, (req, res) => {
-  Idea.findOne({
-    _id: req.params.id,
-  }).then((idea) => {
-    // new values
-    const videoIdea = idea;
-    videoIdea.title = req.body.title;
-    videoIdea.details = req.body.details;
-
-    videoIdea.save()
-      .then((idea) => {
-        req.flash('success_msg', 'Video idea updated');
-        res.redirect('/ideas');
-      });
-  });
-});
-
-router.delete('/:id', ensureAuthenticated, (req, res) => {
-  Idea.remove({
-    _id: req.params.id,
-  }).then(() => {
-    req.flash('success_msg', 'Video idea removed');
-    res.redirect('/ideas');
-  });
-});
-
 router.post('/', ensureAuthenticated, (req, res) => {
   const errors = [];
 
@@ -87,6 +47,52 @@ router.post('/', ensureAuthenticated, (req, res) => {
         res.redirect('/ideas');
       });
   }
+});
+
+
+router.get('/add', ensureAuthenticated, (req, res) => {
+  res.render('ideas/add');
+});
+
+router.get('/edit/:id', ensureAuthenticated, (req, res) => {
+  Idea.findOne({
+    _id: req.params.id,
+  }).then((idea) => {
+    if (idea.user !== req.user.id) {
+      req.flash('error_msg', 'Not authorized');
+      res.redirect('/ideas');
+    } else {
+      res.render('ideas/edit', {
+        idea,
+      });
+    }
+  });
+});
+
+router.put('/:id', ensureAuthenticated, (req, res) => {
+  Idea.findOne({
+    _id: req.params.id,
+  }).then((idea) => {
+    // new values
+    const videoIdea = idea;
+    videoIdea.title = req.body.title;
+    videoIdea.details = req.body.details;
+
+    videoIdea.save()
+      .then((idea) => {
+        req.flash('success_msg', 'Video idea updated');
+        res.redirect('/ideas');
+      });
+  });
+});
+
+router.delete('/:id', ensureAuthenticated, (req, res) => {
+  Idea.remove({
+    _id: req.params.id,
+  }).then(() => {
+    req.flash('success_msg', 'Video idea removed');
+    res.redirect('/ideas');
+  });
 });
 
 module.exports = router;
