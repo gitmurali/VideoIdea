@@ -22,6 +22,13 @@ router.post('/login', (req, res, next) => {
   })(req, res, next);
 });
 
+// logout user
+router.get('/logout', (req, res) => {
+  req.logout();
+  req.flash('success_msg', 'You are now logged out!!');
+  res.redirect('/users/login');
+});
+
 router.get('/register', (req, res) => {
   res.render('users/register');
 });
