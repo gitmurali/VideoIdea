@@ -9,6 +9,7 @@ const passport = require('passport');
 const methodOverride = require('method-override');
 const ideas = require('./routes/ideas');
 const users = require('./routes/users');
+const db = require('./config/database');
 
 const app = express();
 
@@ -18,7 +19,7 @@ mongoose.Promise = global.Promise;
 
 
 // connect to mongoose
-mongoose.connect('mongodb://localhost/video-dev', {
+mongoose.connect(db.mongoURI, {
   useMongoClient: true,
 }).then(() => {
   console.log('mongodb connected..!!');
@@ -74,7 +75,7 @@ app.use('/users', users);
 // Passport config
 require('./config/passport')(passport);
 
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
   console.log(`server started on port: ${port}`);
